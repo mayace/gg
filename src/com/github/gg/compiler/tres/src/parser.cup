@@ -1,0 +1,102 @@
+package com.github.gg.tres;
+
+import com.github.gg.Dict;
+
+//===============================================================================================//
+//===============================================================================================//
+
+parser code {: 
+        
+:};
+
+action code{:
+
+:}
+   
+//===============================================================================================//
+//===============================================================================================//
+terminal        String 		ID,INT,PCOMA,DPUNTOS,EQUAL,DEQUAL,LTHAN,LETHAN,BTHAN,BETHAN,NEQUAL,
+							OR,AND,NOT,PLUS,MINUS,MULT,DIV,LP,RP,GOTO,LL,RL,IF,THEN,LS,RS,PRINT,
+							PRINTLN
+							;
+non terminal    Dict        app,stmt,stmt_list,stmt_label,stmt_assign,id,int,expr,expr1,expr2,expr3,
+							expr4,expr5,expr6,expr7,stmt_goto,stmt_if,stmt_print
+							;
+//===============================================================================================//
+//===============================================================================================//
+
+app			::=	stmt_list
+				|
+				;
+stmt_list	::=	stmt_list stmt
+				|stmt
+				;
+
+stmt 		::=	stmt_label
+				|stmt_assign
+				|stmt_goto
+				|stmt_if
+				|stmt_print
+				;
+
+stmt_label	::=	id DPUNTOS
+				;
+
+stmt_assign ::=	id EQUAL expr PCOMA
+				|id LS expr RS EQUAL expr PCOMA
+				;
+
+stmt_goto 	::=	GOTO id PCOMA
+				;
+
+stmt_if 	::=	IF expr THEN stmt_goto
+				;
+
+stmt_print 	::=	PRINT LP expr RP
+				;
+
+expr 		::=	expr OR expr1
+				|expr1
+				;
+
+expr1		::= expr1 AND expr2
+				|expr2
+				;
+
+expr2 		::=	NOT expr3
+				|expr3
+				;
+
+expr3 		::=	expr3 BTHAN expr4
+				|expr3 LTHAN expr4
+				|expr3 BETHAN expr4
+				|expr3 LETHAN expr4
+				|expr3 DEQUAL expr4
+				|expr3 NEQUAL expr4
+				|expr4
+				;
+
+expr4 		::=	expr4 PLUS expr5
+				|expr4 MINUS expr5
+				|expr5
+				;
+
+expr5 		::=	expr5 MULT expr6
+				|expr5 DIV expr6
+				|expr6
+				;
+
+expr6 		::=	MINUS expr7
+				|expr7
+				;
+
+expr7 		::=	id
+				|id LS expr RS
+				|int
+				|LP expr RP
+				;
+
+id 			::= ID
+				;
+int 		::=	INT
+				;
