@@ -6,21 +6,29 @@ import java.util.HashMap;
 public class Dict<T> extends HashMap<String, T> {
 
     public Dict() {
-        
+
     }
 
-    
-    
-    public Dict(String k, T val) {
-        put(k, val);
+    public Dict(Object... args) {
+
+        String k = null;
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+
+            if (i % 2 == 0) {
+                k = arg.toString();
+            } else {
+                put(k, (T) arg);
+            }
+        }
     }
 
     public T set(String k, T v) {
         return this.put(k, v);
     }
-    
-    public Node getNode(String k){
-        return (Node)get(k);
+
+    public Node getNode(String k) {
+        return (Node) get(k);
     }
 
     public ArrayList<Dict> getDictArrayList(String k) {

@@ -2,7 +2,7 @@ package com.github.gg;
 
 import java_cup.runtime.Symbol;
 
-public class Err {
+public class Err{
 
     private TErr type;
     private String message;
@@ -74,7 +74,7 @@ public class Err {
 
     @Override
     public String toString() {
-        return String.format("[%s] Error con '%s' en linea %d y columna %d -> %s...", getType().toString(), getVal().toString(), getLine(), getColumn(), getMessage());
+        return String.format("Error [%s] con '%s' en linea %d y columna %d -> %s...", getType().toString(), getVal().toString(), getLine(), getColumn(), getMessage());
     }
 
 }

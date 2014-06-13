@@ -26,17 +26,19 @@ public class Node {
         this.val = null;
     }
 
-    public void exec(Object operations) {
+    public void exec(Object actions) {
         if (left != null) {
-            left.exec(operations);
+            left.exec(actions);
         }
         if (right != null) {
-            right.exec(operations);
+            right.exec(actions);
         }
 
-        if (operations instanceof HashMap) {
-            HashMap<Object, Operation> o = (HashMap) operations;
-            setVal(o.get(getOperation()).exec(this));
+        if (actions instanceof Dict) {
+            Dict cations = (Dict) actions;
+
+            HashMap<Object, Operation> o = (HashMap<Object, Operation>) cations.get("operations");
+            setVal(o.get(getOperation()).exec(this, cations.get("cc")));
         }
     }
 
@@ -44,12 +46,12 @@ public class Node {
         final Object r = getRef();
         return (r instanceof Dict ? (Dict) r : null);
     }
-    
-    public Dict getDictVal(){
+
+    public Dict getDictVal() {
         final Object v = getRef();
         return (v instanceof Dict ? (Dict) v : null);
     }
-    
+
     public Object getOperation() {
         return operation;
     }
