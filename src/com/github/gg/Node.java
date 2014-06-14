@@ -38,7 +38,7 @@ public class Node {
             Dict cations = (Dict) actions;
 
             HashMap<Object, Operation> o = (HashMap<Object, Operation>) cations.get("operations");
-            setVal(o.get(getOperation()).exec(this, cations.get("cc")));
+            setVal(o.get(getOperation()).exec(this, actions));
         }
     }
 

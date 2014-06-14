@@ -8,6 +8,7 @@ import java.util.HashSet;
 
 public class TabSim extends HashMap<String, Sim> {
 
+    
     public void addClass(String name, String parent, HashSet<TModifier> modifiers) throws UnsupportedOperationException {
         String key = getKey4class(name);
 
@@ -25,7 +26,7 @@ public class TabSim extends HashMap<String, Sim> {
                 }
             }
 
-            Sim sim = new Sim(TRol.CLASS, null, -1, -1, modifiers, null, name, parent_sim);
+            Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, parent_sim);
             put(key, sim);
         }
     }
@@ -35,11 +36,11 @@ public class TabSim extends HashMap<String, Sim> {
     }
 
     public String getKey(TRol rol, String scope, String type, String name, Object... args) {
-        return String.format("[%s]->[%s]->[%s]->[%s]", rol, scope, type, Arrays.toString(args));
+        return String.format("[%s]->[%s]->[%s]->[%s]->[%s]", rol, scope, type, name, Arrays.toString(args));
     }
 
     public Object[][] toArray2D() {
-        Object[][] rows = new Object[getArrayHeader().length][];
+        Object[][] rows = new Object[size()][];
 
         int i = 0;
         for (Entry<String, Sim> entry : this.entrySet()) {

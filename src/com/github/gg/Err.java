@@ -1,14 +1,17 @@
 package com.github.gg;
 
+import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java_cup.runtime.Symbol;
 
-public class Err{
+public class Err {
 
-    private TErr type;
-    private String message;
-    private Object val;
-    private int line;
-    private int column;
+    public TErr type;
+    public String message;
+    public Object val;
+    public int line;
+    public int column;
 
     public Err(TErr type, String message, Object info) {
         if (info instanceof Symbol) {
@@ -74,7 +77,26 @@ public class Err{
 
     @Override
     public String toString() {
-        return String.format("Error [%s] con '%s' en linea %d y columna %d -> %s...", getType().toString(), getVal().toString(), getLine(), getColumn(), getMessage());
+        return String.format("Error [%s] con el simbolo -> '%s' en linea -> %d y columna -> %d. Mensaje -> %s", getType().toString(), getVal().toString(), getLine(), getColumn(), getMessage());
+    }
+
+    public Object[] toArray() {
+        final Field[] fields = Err.class.getFields();
+        Object[] row = new Object[fields.length];
+
+        for (int i = 0; i < fields.length; i++) {
+            Field f = fields[i];
+            try {
+                f.setAccessible(true);
+                row[i] = f.get(this);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return row;
     }
 
 }

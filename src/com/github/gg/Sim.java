@@ -7,16 +7,16 @@ import java.util.logging.Logger;
 
 public class Sim {
 
-    TRol rol;
-    String scope;
-    int position;
-    int size;
+    public TRol rol;
+    public String scope;
+    public int position;
+    public int size;
 
-    HashSet<TModifier> modifiers;
-    Object type;
-    String name;
+    public HashSet<TModifier> modifiers;
+    public Object type;
+    public String name;
 
-    Sim parent;
+    public Sim parent;
 
     public Sim(TRol rol, String scope, int position, int size, HashSet<TModifier> modifiers, Object type, String name, Sim parent) {
         this.rol = rol;
@@ -31,7 +31,7 @@ public class Sim {
 
     @Override
     public String toString() {
-        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+        return String.format("[Padre -> %s][Nombre -> %s][Atributos -> ][Metodos -> ]", this.name, this.parent);
     }
 
     public Object[] toArray() {
@@ -42,6 +42,7 @@ public class Sim {
         for (int i = 0; i < fields.length; i++) {
             Field f = fields[i];
             try {
+                f.setAccessible(true);
                 row[i] = f.get(this);
             } catch (IllegalArgumentException ex) {
                 Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
@@ -52,5 +53,5 @@ public class Sim {
 
         return row;
     }
-   
+
 }
