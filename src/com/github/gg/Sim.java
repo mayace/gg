@@ -31,7 +31,7 @@ public class Sim {
 
     @Override
     public String toString() {
-        return String.format("[Padre -> %s][Nombre -> %s][Atributos -> ][Metodos -> ]", this.name, this.parent);
+        return String.format("[Padre -> %s][Nombre -> %s][Atributos -> ][Metodos -> ]", this.parent, this.name);
     }
 
     public Object[] toArray() {

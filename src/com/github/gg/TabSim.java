@@ -5,10 +5,47 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public class TabSim extends HashMap<String, Sim> {
 
-    
+    public void addMethod(String classname, HashSet<TModifier> modifiers, String type, String name,Object ... params) {
+        String key = getKey4method(classname, type, name,params);
+        if (containsKey(key)) {
+            throw new UnsupportedOperationException("Ya existe el metodo -> '" + name + "'");
+        }
+
+        String classkey = getKey4class(classname);
+        if (!containsKey(classkey)) {
+            throw new UnsupportedOperationException("No existe la clase -> '" + classname + "'");
+        }
+
+        Sim classsim = get(classkey);
+        
+        Sim sim = new Sim(TRol.METHOD, classname, classsim.size++, 1, modifiers, type, name, null);
+
+        put(key, sim);
+    }
+
+    public void addField(String classname, HashSet<TModifier> modifiers, String type, String name) {
+        String key = getKey4field(classname, type, name);
+        if (containsKey(key)) {
+            throw new UnsupportedOperationException("Ya existe el campo -> '" + name + "'");
+        }
+
+        String classkey = getKey4class(classname);
+        if (!containsKey(classkey)) {
+            throw new UnsupportedOperationException("No existe la clase -> '" + classname + "'");
+        }
+
+        Sim classsim = get(classkey);
+
+        Sim sim = new Sim(TRol.FIELD, classname, classsim.size++, 1, modifiers, type, name, null);
+
+        put(key, sim);
+
+    }
+
     public void addClass(String name, String parent, HashSet<TModifier> modifiers) throws UnsupportedOperationException {
         String key = getKey4class(name);
 
@@ -33,6 +70,15 @@ public class TabSim extends HashMap<String, Sim> {
 
     public String getKey4class(String name) {
         return getKey(TRol.CLASS, null, null, name, new Object[]{});
+    }
+    
+    
+
+    public String getKey4field(String classname, String type, String name) {
+        return getKey(TRol.FIELD, classname, type, name, new Object[]{});
+    }
+    public String getKey4method(String classname, String type, String name,Object ... params) {
+        return getKey(TRol.FIELD, classname, type, name, params);
     }
 
     public String getKey(TRol rol, String scope, String type, String name, Object... args) {

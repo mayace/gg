@@ -2,8 +2,9 @@ package com.github.gg;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
-public class Dict<T> extends HashMap<String, T> {
+public class Dict extends HashMap<String, Object> {
 
     public Dict() {
 
@@ -18,12 +19,12 @@ public class Dict<T> extends HashMap<String, T> {
             if (i % 2 == 0) {
                 k = arg.toString();
             } else {
-                put(k, (T) arg);
+                put(k, arg);
             }
         }
     }
 
-    public T set(String k, T v) {
+    public Object set(String k, Object v) {
         return this.put(k, v);
     }
 
@@ -36,7 +37,8 @@ public class Dict<T> extends HashMap<String, T> {
     }
 
     public String getString(String k) {
-        return (String) get(k);
+        final Object val = get(k);
+        return (val == null ? null : val.toString());
     }
 
     public Dict getDict(String k) {
@@ -45,6 +47,10 @@ public class Dict<T> extends HashMap<String, T> {
 
     public Boolean getBoolean(String k) {
         return (Boolean) get(k);
+    }
+
+    public Stack getStack(String k) {
+        return (Stack) get(k);
     }
 
     @Override
