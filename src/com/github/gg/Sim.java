@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Sim {
+public class Sim implements Cloneable{
 
     public TRol rol;
     public String scope;
@@ -31,7 +31,7 @@ public class Sim {
 
     @Override
     public String toString() {
-        return String.format("[Padre -> %s][Nombre -> %s][Atributos -> ][Metodos -> ]", this.parent, this.name);
+        return this.name;
     }
 
     public Object[] toArray() {
@@ -54,4 +54,10 @@ public class Sim {
         return row;
     }
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 }

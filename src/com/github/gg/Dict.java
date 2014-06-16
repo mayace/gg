@@ -59,4 +59,10 @@ public class Dict extends HashMap<String, Object> {
         return super.containsKey(key);
     }
 
+    public Sim getSim(String k) {
+        return (Sim)get(k);
+    }
+
+
+
 }
