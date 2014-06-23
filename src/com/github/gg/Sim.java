@@ -16,9 +16,10 @@ public class Sim implements Cloneable{
     public Object type;
     public String name;
 
-    public Sim parent;
+    public Object parent;
+    public Object others;
 
-    public Sim(TRol rol, String scope, int position, int size, HashSet<TModifier> modifiers, Object type, String name, Sim parent) {
+    public Sim(TRol rol, String scope, int position, int size, HashSet<TModifier> modifiers, Object type, String name, Object parent) {
         this.rol = rol;
         this.scope = scope;
         this.position = position;

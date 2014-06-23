@@ -2,5 +2,5 @@ package com.github.gg;
 
 public enum TRol {
 
-    VARIABLE, CLASS, METHOD,FIELD
+    LOCALVAR, CLASS, METHOD,FIELD
 }

@@ -1,7 +1,9 @@
 package com.github.gg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
 public class Dict extends HashMap<String, Object> {
@@ -60,9 +62,32 @@ public class Dict extends HashMap<String, Object> {
     }
 
     public Sim getSim(String k) {
-        return (Sim)get(k);
+        return (Sim) get(k);
     }
 
+    @Override
+    public String toString() {
+        Iterator<Entry<String, Object>> i = entrySet().iterator();
+        if (!i.hasNext()) {
+            return "{}";
+        }
 
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (;;) {
+            Entry<String, Object> e = i.next();
+            String key = e.getKey();
+            Object value = e.getValue();
+//            sb.append(key == this ? "(this Map)" : key);
+            sb.append(key);
+            sb.append('=');
+//            sb.append(value == this ? "(this Map)" : (value instanceof Object[] ? Arrays.toString(value) : value));
+            sb.append(value instanceof Object[] ? Arrays.toString((Object[])value) : value);
+            if (!i.hasNext()) {
+                return sb.append('}').toString();
+            }
+            sb.append(',').append(' ');
+        }
+    }
 
 }

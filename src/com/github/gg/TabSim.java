@@ -10,21 +10,25 @@ import javafx.beans.binding.StringBinding;
 
 public class TabSim extends HashMap<String, Sim> {
 
-    public void addVariable(Sim method, String type, String name) {
-        String key = getKey4parameter(method.name, type, name);
+    public void addVariable(Sim method_sim, String type, String name) {
+        final Dict method_others = (Dict) method_sim.others;
+        String key = getKey4parameter(method_sim.name, type, name, method_others.get("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
         }
-        Sim sim = new Sim(TRol.VARIABLE, method.name, method.size++, 1, new HashSet<TModifier>() {
+        Sim sim = new Sim(TRol.LOCALVAR, method_sim.name, method_sim.size++, 1, new HashSet<TModifier>() {
         }, type, name, null);
 
+        sim.others = new Dict("overload", method_others.get("overload"));
+
         put(key, sim);
-        
+
     }
 
-    public void addParameter(Sim method, boolean ref, String type, String name) {
-        String key = getKey4parameter(method.name, type, name);
+    public void addParameter(Sim method_sim, boolean ref, String type, String name,Dict others) {
+        final Dict method_others = (Dict) method_sim.others;
+        String key = getKey4parameter(method_sim.name, type, name, method_others.get("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
@@ -34,13 +38,43 @@ public class TabSim extends HashMap<String, Sim> {
 //        if (!containsKey(classkey)) {
 //            throw new UnsupportedOperationException("No existe la clase -> '" + classname + "'");
 //        }
-        Sim sim = new Sim(TRol.VARIABLE, method.name, method.size++, 1, new HashSet<TModifier>() {
+        Sim sim = new Sim(TRol.LOCALVAR, method_sim.name, method_sim.size++, 1, new HashSet<TModifier>() {
         }, type, name, null);
+        sim.others = others;
+        others.put("overload", method_others.get("overload"));
+        others.put("ref", ref);
 
         put(key, sim);
-        
-        if(ref){
+
+        if (ref) {
         }
+    }
+
+    public Sim addConstruct(String classname, HashSet<TModifier> modifiers, String name, Object... params) {
+        String key = getKey4method(classname, null, name, params);
+
+        if (!name.equals(classname)) {
+            throw new UnsupportedOperationException("El nombre de contructor no coincide con el nombre de la clase -> '" + classname + "'");
+        }
+
+        if (containsKey(key)) {
+            throw new UnsupportedOperationException("Ya existe el constructor -> '" + name + "'");
+        }
+
+        String classkey = getKey4class(classname);
+        if (!containsKey(classkey)) {
+            throw new UnsupportedOperationException("No existe la clase -> '" + classname + "'");
+        }
+
+        Sim classsim = get(classkey);
+
+        Sim sim = new Sim(TRol.METHOD, classname, -1, 0, modifiers, null, name, null);
+        sim.others = new Dict("overload", params);
+
+        put(key, sim);
+
+        //return y this
+        return sim;
     }
 
     public Sim addMethod(String classname, HashSet<TModifier> modifiers, String type, String name, Object... params) {
@@ -64,7 +98,7 @@ public class TabSim extends HashMap<String, Sim> {
         return sim;
     }
 
-    public void addField(String classname, HashSet<TModifier> modifiers, String type, String name) {
+    public void addField(String classname, HashSet<TModifier> modifiers, String type, String name, Object otros) {
         String key = getKey4field(classname, type, name);
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe el campo -> '" + name + "'");
@@ -76,11 +110,19 @@ public class TabSim extends HashMap<String, Sim> {
         }
 
         Sim classsim = get(classkey);
-
         Sim sim = new Sim(TRol.FIELD, classname, classsim.size++, 1, modifiers, type, name, null);
+        sim.others = otros;
 
         put(key, sim);
 
+        // DEFAULTS...
+        if (type.equals(TType.FLOAT.toString())) {
+            sim.size = 2;
+            classsim.size++;
+        }
+        if (modifiers.isEmpty()) {
+            sim.modifiers.add(TModifier.PUBLIC);
+        }
     }
 
     public void addClass(String name, String parent, HashSet<TModifier> modifiers) throws UnsupportedOperationException, CloneNotSupportedException {
@@ -100,17 +142,21 @@ public class TabSim extends HashMap<String, Sim> {
                 }
             }
 
-            Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, parent_sim);
+            Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, (parent_sim == null ? null : parent_sim.name));
 
             put(key, sim);
 
-            //////
+            // heredar????????
             Sim[] s = getFields(parent);
             for (int i = 0; i < s.length; i++) {
                 Sim clon = (Sim) s[i].clone();
                 clon.scope = name;
                 sim.size++;
                 put(getKey4field(name, clon.type.toString(), clon.name), clon);
+            }
+
+            if (modifiers.isEmpty()) {
+                sim.modifiers.add(TModifier.PUBLIC);
             }
         }
     }
@@ -127,8 +173,8 @@ public class TabSim extends HashMap<String, Sim> {
         return getKey(TRol.FIELD, classname, type, name, params);
     }
 
-    private String getKey4parameter(String methodname, String type, String name) {
-        return getKey(TRol.VARIABLE, methodname, type, name, new Object[]{});
+    private String getKey4parameter(String methodname, String type, String name, Object... params) {
+        return getKey(TRol.LOCALVAR, methodname, type, name, params);
     }
 
     private String key_delimiter = "->";
