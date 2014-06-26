@@ -1,5 +1,6 @@
 package com.github.gg;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -89,5 +90,15 @@ public class Dict extends HashMap<String, Object> {
             sb.append(',').append(' ');
         }
     }
+    
+    public Path getPath(String key){
+        return (Path) get(key);
+    }
+    
+    public int getInt(String k){
+        return Integer.parseInt(getString(k));
+    }
+
+  
 
 }

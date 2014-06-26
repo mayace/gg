@@ -48,7 +48,7 @@ public class Node {
     }
 
     public Dict getDictVal() {
-        final Object v = getRef();
+        final Object v = getVal();
         return (v instanceof Dict ? (Dict) v : null);
     }
 

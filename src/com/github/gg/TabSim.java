@@ -10,9 +10,32 @@ import javafx.beans.binding.StringBinding;
 
 public class TabSim extends HashMap<String, Sim> {
 
-    public void addVariable(Sim method_sim, String type, String name) {
+    public Sim getLocalvar(Object scope, String name, Object... params) {
+
+        String key = getKey4parameter(scope.toString(), name, params);
+
+        if (!containsKey(key)) {
+            throw new UnsupportedOperationException("No existe la variabla -> " + name);
+        }
+        
+        
+
+        return get(key);
+    }
+
+    public Sim getMethod(String classname, String type, String name, Object... params) {
+        String key = getKey4method(classname, type, name, params);
+
+        if (!containsKey(key)) {
+            throw new UnsupportedOperationException("No existe el metodo -> " + name);
+        }
+
+        return get(key);
+    }
+
+    public void addVariable(Sim method_sim, String type, String name, Dict others) {
         final Dict method_others = (Dict) method_sim.others;
-        String key = getKey4parameter(method_sim.name, type, name, method_others.get("overload"));
+        String key = getKey4parameter(method_sim.name, name, method_others.get("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
@@ -20,15 +43,16 @@ public class TabSim extends HashMap<String, Sim> {
         Sim sim = new Sim(TRol.LOCALVAR, method_sim.name, method_sim.size++, 1, new HashSet<TModifier>() {
         }, type, name, null);
 
-        sim.others = new Dict("overload", method_others.get("overload"));
+        sim.others = others;
+        others.put("overload", method_others.get("overload"));
 
         put(key, sim);
 
     }
 
-    public void addParameter(Sim method_sim, boolean ref, String type, String name,Dict others) {
+    public void addParameter(Sim method_sim, boolean ref, String type, String name, Dict others) {
         final Dict method_others = (Dict) method_sim.others;
-        String key = getKey4parameter(method_sim.name, type, name, method_others.get("overload"));
+        String key = getKey4parameter(method_sim.name, name, method_others.get("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
@@ -91,6 +115,7 @@ public class TabSim extends HashMap<String, Sim> {
         Sim classsim = get(classkey);
 
         Sim sim = new Sim(TRol.METHOD, classname, -1, 0, modifiers, type, name, null);
+        sim.others = new Dict("overload", params);
 
         put(key, sim);
 
@@ -170,11 +195,11 @@ public class TabSim extends HashMap<String, Sim> {
     }
 
     public String getKey4method(String classname, String type, String name, Object... params) {
-        return getKey(TRol.FIELD, classname, type, name, params);
+        return getKey(TRol.METHOD, classname, type, name, params);
     }
 
-    private String getKey4parameter(String methodname, String type, String name, Object... params) {
-        return getKey(TRol.LOCALVAR, methodname, type, name, params);
+    private String getKey4parameter(String methodname, String name, Object... params) {
+        return getKey(TRol.LOCALVAR, methodname, null, name, params);
     }
 
     private String key_delimiter = "->";
