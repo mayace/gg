@@ -5,10 +5,46 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import javafx.beans.binding.StringBinding;
 
 public class TabSim extends HashMap<String, Sim> {
+
+    public Sim getPublicClass(Object name){
+        String key = getKey4class(name.toString());
+        
+        Sim sim = getClass(name);
+        
+        if(!sim.modifiers.contains(TModifier.PUBLIC)){
+            throw new UnsupportedOperationException("La clase -> "+ name +" no es -> "+ TModifier.PUBLIC);
+        }
+        
+        return sim;
+    }
+    public Sim getPublicField(Object classname, Object name) {
+        Sim field_sim = getField(classname, name);
+
+        if (!field_sim.modifiers.contains(TModifier.PUBLIC)) {
+            throw new UnsupportedOperationException("El campo -> " + name + " no es -> " + TModifier.PUBLIC);
+        }
+        return field_sim;
+    }
+
+    public Sim getField(Object classname, Object name) {
+        String key = getKey4field(classname.toString(), name.toString());
+        if (!containsKey(key)) {
+            throw new UnsupportedOperationException("No existe el campo -> " + name);
+        }
+
+        return get(key);
+    }
+
+    public Sim getClass(Object name) {
+        String key = getKey4class(name.toString());
+        if (!containsKey(key)) {
+            throw new UnsupportedOperationException("No existe la clase -> " + name);
+        }
+
+        return get(key);
+    }
 
     public Sim getLocalvar(Object scope, String name, Object... params) {
 
@@ -17,8 +53,6 @@ public class TabSim extends HashMap<String, Sim> {
         if (!containsKey(key)) {
             throw new UnsupportedOperationException("No existe la variabla -> " + name);
         }
-        
-        
 
         return get(key);
     }
@@ -33,9 +67,9 @@ public class TabSim extends HashMap<String, Sim> {
         return get(key);
     }
 
-    public void addVariable(Sim method_sim, String type, String name, Dict others) {
+    public Sim addVariable(Sim method_sim, String type, String name, Dict others) {
         final Dict method_others = (Dict) method_sim.others;
-        String key = getKey4parameter(method_sim.name, name, method_others.get("overload"));
+        String key = getKey4parameter(method_sim.name, name, method_others.getObjArray("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
@@ -47,6 +81,8 @@ public class TabSim extends HashMap<String, Sim> {
         others.put("overload", method_others.get("overload"));
 
         put(key, sim);
+
+        return sim;
 
     }
 
@@ -97,7 +133,8 @@ public class TabSim extends HashMap<String, Sim> {
 
         put(key, sim);
 
-        //return y this
+        // classim
+        
         return sim;
     }
 
@@ -124,7 +161,7 @@ public class TabSim extends HashMap<String, Sim> {
     }
 
     public void addField(String classname, HashSet<TModifier> modifiers, String type, String name, Object otros) {
-        String key = getKey4field(classname, type, name);
+        String key = getKey4field(classname, name);
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe el campo -> '" + name + "'");
         }
@@ -168,7 +205,8 @@ public class TabSim extends HashMap<String, Sim> {
             }
 
             Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, (parent_sim == null ? null : parent_sim.name));
-
+            sim.others = new Dict();
+            
             put(key, sim);
 
             // heredar????????
@@ -177,7 +215,7 @@ public class TabSim extends HashMap<String, Sim> {
                 Sim clon = (Sim) s[i].clone();
                 clon.scope = name;
                 sim.size++;
-                put(getKey4field(name, clon.type.toString(), clon.name), clon);
+                put(getKey4field(name, clon.name), clon);
             }
 
             if (modifiers.isEmpty()) {
@@ -190,8 +228,8 @@ public class TabSim extends HashMap<String, Sim> {
         return getKey(TRol.CLASS, null, null, name, new Object[]{});
     }
 
-    public String getKey4field(String classname, String type, String name) {
-        return getKey(TRol.FIELD, classname, type, name, new Object[]{});
+    public String getKey4field(String classname, String name) {
+        return getKey(TRol.FIELD, classname, null, name, new Object[]{});
     }
 
     public String getKey4method(String classname, String type, String name, Object... params) {
@@ -202,7 +240,7 @@ public class TabSim extends HashMap<String, Sim> {
         return getKey(TRol.LOCALVAR, methodname, null, name, params);
     }
 
-    private String key_delimiter = "->";
+    private final String key_delimiter = "->";
 
     public String getKey(TRol rol, String scope, String type, String name, Object... args) {
         return String.format("[%2$s]%1$s[%3$s]%1$s[%4$s]%1$s[%5$s]%1$s[%6$s]", key_delimiter, rol, scope, type, name, Arrays.toString(args));
@@ -238,7 +276,7 @@ public class TabSim extends HashMap<String, Sim> {
     private Sim[] getFields(String classname) {
         ArrayList<Sim> list = new ArrayList<>();
 
-        String classfieldkey = getKeyPart(getKey4field(classname, "gg", "gg"), 2);
+        String classfieldkey = getKeyPart(getKey4field(classname, "gg"), 2);
 
         for (Entry<String, Sim> entry : this.entrySet()) {
             String key = entry.getKey();

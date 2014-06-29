@@ -18,6 +18,15 @@ public class Gg {
 //        System.err.println(b);
 //
 //        p.parse();
+        
+        int[][] a = new int[2][3];
+        
+        for (int i = 0; i < a.length; i++) {
+            int[] is = a[i];
+            System.err.println(i);
+        }
+        
+        
     }
 
 }

@@ -83,22 +83,36 @@ public class Dict extends HashMap<String, Object> {
             sb.append(key);
             sb.append('=');
 //            sb.append(value == this ? "(this Map)" : (value instanceof Object[] ? Arrays.toString(value) : value));
-            sb.append(value instanceof Object[] ? Arrays.toString((Object[])value) : value);
+
+            //<editor-fold defaultstate="collapsed" desc="ARRAYS...">
+            if (value instanceof Object[]) {
+                sb.append(Arrays.toString((Object[]) value));
+            } else if (value instanceof int[]){
+                sb.append(Arrays.toString((int[]) value));
+            } else {
+                sb.append(value);
+            }
+            //</editor-fold>
             if (!i.hasNext()) {
                 return sb.append('}').toString();
             }
             sb.append(',').append(' ');
         }
     }
-    
-    public Path getPath(String key){
+
+    public Path getPath(String key) {
         return (Path) get(key);
     }
-    
-    public int getInt(String k){
+
+    public int getInt(String k) {
         return Integer.parseInt(getString(k));
     }
 
-  
+    public Object[] getObjArray(String k) {
+        return (Object[]) get(k);
+    }
+    public int[] getIntArray(String k) {
+        return (int[]) get(k);
+    }
 
 }

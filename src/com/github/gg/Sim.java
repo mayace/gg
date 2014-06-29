@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Sim implements Cloneable{
+public class Sim implements Cloneable {
 
     public TRol rol;
     public String scope;
@@ -35,6 +35,10 @@ public class Sim implements Cloneable{
         return this.name;
     }
 
+    public Dict getDictOthers() {
+        return this.others == null ? null : (Dict) this.others;
+    }
+
     public Object[] toArray() {
 
         final Field[] fields = Sim.class.getFields();
@@ -60,5 +64,4 @@ public class Sim implements Cloneable{
         return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
 }
