@@ -9,6 +9,7 @@ public class Node {
     private Node right;
     private Object ref;
     private Object val;
+    private boolean autoexec = true;
 
     public Node(Object operation, Node left, Node right, Object ref, Object val) {
         this.operation = operation;
@@ -27,10 +28,10 @@ public class Node {
     }
 
     public void exec(Object actions) {
-        if (left != null) {
+        if (left != null && autoexec) {
             left.exec(actions);
         }
-        if (right != null) {
+        if (right != null && autoexec) {
             right.exec(actions);
         }
 
@@ -92,4 +93,13 @@ public class Node {
         this.val = val;
     }
 
+    public boolean isAutoexec() {
+        return autoexec;
+    }
+
+    public void setAutoexec(boolean autoexec) {
+        this.autoexec = autoexec;
+    }
+
+    
 }
