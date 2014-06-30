@@ -8,17 +8,18 @@ import java.util.HashSet;
 
 public class TabSim extends HashMap<String, Sim> {
 
-    public Sim getPublicClass(Object name){
+    public Sim getPublicClass(Object name) {
         String key = getKey4class(name.toString());
-        
+
         Sim sim = getClass(name);
-        
-        if(!sim.modifiers.contains(TModifier.PUBLIC)){
-            throw new UnsupportedOperationException("La clase -> "+ name +" no es -> "+ TModifier.PUBLIC);
+
+        if (!sim.modifiers.contains(TModifier.PUBLIC)) {
+            throw new UnsupportedOperationException("La clase -> " + name + " no es -> " + TModifier.PUBLIC);
         }
-        
+
         return sim;
     }
+
     public Sim getPublicField(Object classname, Object name) {
         Sim field_sim = getField(classname, name);
 
@@ -67,6 +68,16 @@ public class TabSim extends HashMap<String, Sim> {
         return get(key);
     }
 
+    public Sim getConstructor(String classname, Object... params) {
+        String key = getKey4constructor(classname, params);
+
+        if (!containsKey(key)) {
+            throw new UnsupportedOperationException("No existe el constructor -> " + classname);
+        }
+
+        return get(key);
+    }
+
     public Sim addVariable(Sim method_sim, String type, String name, Dict others) {
         final Dict method_others = (Dict) method_sim.others;
         String key = getKey4parameter(method_sim.name, name, method_others.getObjArray("overload"));
@@ -110,15 +121,15 @@ public class TabSim extends HashMap<String, Sim> {
         }
     }
 
-    public Sim addConstruct(String classname, HashSet<TModifier> modifiers, String name, Object... params) {
-        String key = getKey4method(classname, null, name, params);
+    public Sim addConstructor(String classname, HashSet<TModifier> modifiers, String name, Object... params) {
+        String key = getKey4constructor(classname, params);
 
         if (!name.equals(classname)) {
             throw new UnsupportedOperationException("El nombre de contructor no coincide con el nombre de la clase -> '" + classname + "'");
         }
 
         if (containsKey(key)) {
-            throw new UnsupportedOperationException("Ya existe el constructor -> '" + name + "'");
+            throw new UnsupportedOperationException("Ya existe el constructor -> '" + name + "' "+Arrays.toString(params));
         }
 
         String classkey = getKey4class(classname);
@@ -128,13 +139,14 @@ public class TabSim extends HashMap<String, Sim> {
 
         Sim classsim = get(classkey);
 
-        Sim sim = new Sim(TRol.METHOD, classname, -1, 0, modifiers, null, name, null);
+        Sim sim = new Sim(TRol.METHOD, classname, -1, 0, modifiers, classname, name, null);
         sim.others = new Dict("overload", params);
 
         put(key, sim);
 
         // classim
-        
+        classsim.getDictOthers().put("constructor", classsim.getDictOthers().getInt("constructor") + 1);
+
         return sim;
     }
 
@@ -187,41 +199,42 @@ public class TabSim extends HashMap<String, Sim> {
         }
     }
 
-    public void addClass(String name, String parent, HashSet<TModifier> modifiers) throws UnsupportedOperationException, CloneNotSupportedException {
+    public Sim addClass(String name, String parent, HashSet<TModifier> modifiers) throws UnsupportedOperationException, CloneNotSupportedException {
         String key = getKey4class(name);
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la clase -> '" + name + "'");
-        } else {
+        }
 
-            Sim parent_sim = null;
-            if (parent != null && !parent.trim().isEmpty()) {
-                String pkey = getKey4class(parent);
-                if (containsKey(pkey)) {
-                    parent_sim = get(pkey);
-                } else {
-                    throw new UnsupportedOperationException("No existe la clase padre -> '" + parent + "'");
-                }
-            }
-
-            Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, (parent_sim == null ? null : parent_sim.name));
-            sim.others = new Dict();
-            
-            put(key, sim);
-
-            // heredar????????
-            Sim[] s = getFields(parent);
-            for (int i = 0; i < s.length; i++) {
-                Sim clon = (Sim) s[i].clone();
-                clon.scope = name;
-                sim.size++;
-                put(getKey4field(name, clon.name), clon);
-            }
-
-            if (modifiers.isEmpty()) {
-                sim.modifiers.add(TModifier.PUBLIC);
+        Sim parent_sim = null;
+        if (parent != null && !parent.trim().isEmpty()) {
+            String pkey = getKey4class(parent);
+            if (containsKey(pkey)) {
+                parent_sim = get(pkey);
+            } else {
+                throw new UnsupportedOperationException("No existe la clase padre -> '" + parent + "'");
             }
         }
+
+        Sim sim = new Sim(TRol.CLASS, null, -1, 0, modifiers, null, name, (parent_sim == null ? null : parent_sim.name));
+        sim.others = new Dict("constructor", 0);
+
+        put(key, sim);
+
+        // heredar????????
+        Sim[] s = getFields(parent);
+        for (int i = 0; i < s.length; i++) {
+            Sim clon = (Sim) s[i].clone();
+            clon.scope = name;
+            sim.size++;
+            put(getKey4field(name, clon.name), clon);
+        }
+
+        if (modifiers.isEmpty()) {
+            sim.modifiers.add(TModifier.PUBLIC);
+        }
+
+        return sim;
     }
 
     public String getKey4class(String name) {
@@ -234,6 +247,10 @@ public class TabSim extends HashMap<String, Sim> {
 
     public String getKey4method(String classname, String type, String name, Object... params) {
         return getKey(TRol.METHOD, classname, type, name, params);
+    }
+
+    public String getKey4constructor(String classname, Object... params) {
+        return getKey(TRol.METHOD, classname, classname, classname, params);
     }
 
     private String getKey4parameter(String methodname, String name, Object... params) {
