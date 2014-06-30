@@ -43,6 +43,26 @@ public class Dict extends HashMap<String, Object> {
         final Object val = get(k);
         return (val == null ? null : val.toString());
     }
+    
+    public TType getType(String k) {
+        final Object val = (TType)get(k);
+        return (val == null ? null : (TType)val);
+    }
+    
+    public BloqueCondicion getTags(String k) {
+        final Object val = (BloqueCondicion)get(k);
+        return (val == null ? null : (BloqueCondicion)val);
+    }
+    
+    public String getCodigo3D(String k) {
+        final Object val = get(k);
+        return (val == null ? null : val.toString());
+    }
+
+    public int getLenth(String k) {
+        final Object val = (int)get(k);
+        return (val == null ? null : (int)val);
+    }
 
     public Dict getDict(String k) {
         return (Dict) get(k);
