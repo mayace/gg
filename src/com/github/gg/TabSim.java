@@ -262,7 +262,7 @@ public class TabSim extends HashMap<String, Sim> {
         return getKey(TRol.METHOD, classname, classname, classname, params);
     }
 
-    private String getKey4parameter(String methodname, String name, Object... params) {
+    public String getKey4parameter(String methodname, String name, Object... params) {
         return getKey(TRol.LOCALVAR, methodname, null, name, params);
     }
 
