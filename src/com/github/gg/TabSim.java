@@ -8,6 +8,15 @@ import java.util.HashSet;
 
 public class TabSim extends HashMap<String, Sim> {
 
+    public Sim getPublicMethod(Object classname, Object name, Object... params) {
+        Sim sim = getMethod(classname.toString(), name.toString(), params);
+        if (!sim.modifiers.contains(TModifier.PUBLIC)) {
+            throw new UnsupportedOperationException("El metodo -> " + name + Arrays.toString(params) + " no es -> " + TModifier.PUBLIC);
+        }
+
+        return sim;
+    }
+
     public Sim getPublicClass(Object name) {
         String key = getKey4class(name.toString());
 
@@ -58,11 +67,11 @@ public class TabSim extends HashMap<String, Sim> {
         return get(key);
     }
 
-    public Sim getMethod(String classname, String type, String name, Object... params) {
-        String key = getKey4method(classname, type, name, params);
+    public Sim getMethod(String classname, String name, Object... params) {
+        String key = getKey4method(classname, name, params);
 
         if (!containsKey(key)) {
-            throw new UnsupportedOperationException("No existe el metodo -> " + name);
+            throw new UnsupportedOperationException("No existe el metodo -> " + name + Arrays.toString(params));
         }
 
         return get(key);
@@ -72,7 +81,7 @@ public class TabSim extends HashMap<String, Sim> {
         String key = getKey4constructor(classname, params);
 
         if (!containsKey(key)) {
-            throw new UnsupportedOperationException("No existe el constructor -> " + classname);
+            throw new UnsupportedOperationException("No existe el constructor -> " + classname + Arrays.toString(params));
         }
 
         return get(key);
@@ -129,7 +138,7 @@ public class TabSim extends HashMap<String, Sim> {
         }
 
         if (containsKey(key)) {
-            throw new UnsupportedOperationException("Ya existe el constructor -> '" + name + "' "+Arrays.toString(params));
+            throw new UnsupportedOperationException("Ya existe el constructor -> '" + name + "' " + Arrays.toString(params));
         }
 
         String classkey = getKey4class(classname);
@@ -151,9 +160,9 @@ public class TabSim extends HashMap<String, Sim> {
     }
 
     public Sim addMethod(String classname, HashSet<TModifier> modifiers, String type, String name, Object... params) {
-        String key = getKey4method(classname, type, name, params);
+        String key = getKey4method(classname, name, params);
         if (containsKey(key)) {
-            throw new UnsupportedOperationException("Ya existe el metodo -> '" + name + "'");
+            throw new UnsupportedOperationException("Ya existe el metodo -> " + name + Arrays.toString(params));
         }
 
         String classkey = getKey4class(classname);
@@ -245,8 +254,8 @@ public class TabSim extends HashMap<String, Sim> {
         return getKey(TRol.FIELD, classname, null, name, new Object[]{});
     }
 
-    public String getKey4method(String classname, String type, String name, Object... params) {
-        return getKey(TRol.METHOD, classname, type, name, params);
+    public String getKey4method(String classname, String name, Object... params) {
+        return getKey(TRol.METHOD, classname, null, name, params);
     }
 
     public String getKey4constructor(String classname, Object... params) {
