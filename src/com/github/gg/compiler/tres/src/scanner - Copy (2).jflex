@@ -41,6 +41,7 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     "="                 {return symbol(Sym.EQUAL);}
     ":"                 {return symbol(Sym.DPUNTOS);}
     ";"                 {return symbol(Sym.PCOMA);}
+    ","                 {return symbol(Sym.COMA);}
 
     "=="                {return symbol(Sym.DEQUAL);}
     "!="                {return symbol(Sym.NEQUAL);}
@@ -63,26 +64,17 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     "%"                 {return symbol(Sym.MOD);}
     "^"                 {return symbol(Sym.EXP);}
     
-    // "char"              {return symbol(Sym.KW_CHAR);}
+    "char"              {return symbol(Sym.KW_CHAR);}
     "void"              {return symbol(Sym.KW_VOID);}
-    "call"              {return symbol(Sym.KW_CALL);}
     // "int"               {return symbol(Sym.KW_INT);}
-    "p"                 {return symbol(Sym.P);}
+    "p"                 {return symbol(Sym.S);}
     "h"                 {return symbol(Sym.H);}
     "pila"              {return symbol(Sym.STACK);}
     "heap"              {return symbol(Sym.HEAP);}
     "goto"              {return symbol(Sym.GOTO);}
     "if"                {return symbol(Sym.IF);}
-
     "print"             {return symbol(Sym.PRINT);}
     "println"           {return symbol(Sym.PRINTLN);}
-    "linea"             {return symbol(Sym.KW_LINEA);}
-    "texto"             {return symbol(Sym.KW_TEXTO);}
-    "arco"              {return symbol(Sym.KW_ARCO);}
-    "rectangulo"        {return symbol(Sym.KW_RECTANGULO);}
-    "ovalo"             {return symbol(Sym.KW_OVALO);}
-    "poligono"          {return symbol(Sym.KW_POLIGONO);}
-    "lienzo"            {return symbol(Sym.KW_LIENZO);}
 
 
     {FLOAT}             {return symbol(Sym.FLOAT);}

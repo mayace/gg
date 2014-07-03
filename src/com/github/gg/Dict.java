@@ -9,6 +9,10 @@ import java.util.Stack;
 
 public class Dict extends HashMap<String, Object> {
 
+   public float getFloat(String k){
+        return Float.parseFloat(getString(k));
+    }
+    
     public Dict() {
 
     }

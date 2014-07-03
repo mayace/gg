@@ -1,0 +1,263 @@
+package com.github.gg.compiler.tres;
+
+import com.github.gg.Dict;
+import com.github.gg.Node;
+import com.github.gg.TOperation;
+import com.github.gg.TType;
+import com.github.gg.TErr;
+import com.github.gg.Err;
+import java.util.ArrayList;
+
+//===============================================================================================//
+//===============================================================================================//
+
+parser code {:
+	Object info = null;
+
+	public void report_error(String message, Object info){
+		this.info = info;
+    }
+
+    public void report_fatal_error(String message,Object info){
+        report_error(message,info);
+        Err err = new Err(TErr.SINTACTICO,message,info);
+        System.err.println(err);
+    }
+:};
+
+action code{::}
+   
+//===============================================================================================//
+//===============================================================================================//
+terminal        String 		ID,INT,PCOMA,DPUNTOS,EQUAL,DEQUAL,LTHAN,LETHAN,BTHAN,BETHAN,NEQUAL,
+							PLUS,MINUS,MULT,DIV,LP,RP,GOTO,IF,LS,RS,PRINT,LL,RL,KW_CHAR,
+							PRINTLN,HEAP,STACK,H,S,COMA,COMMENT,ERROR,MOD,EXP,FLOAT,KW_VOID
+							;
+non terminal    Dict        app,stmt,stmt_list,stmt_label,expr_assign,id,int,expr_arith,expr_rel,
+							expr_primary_list,expr_primary,stmt_goto,stmt_if,
+							stmt_print,err, error_lexico,error_sintactico,float,memory,heap,stack,s,h,char,
+							comment,method,method_stmts,method_stmt,method_stmt_list,method_call
+							;
+//===============================================================================================//
+//===============================================================================================//
+
+app			::=	stmt_list:l 	{:RESULT = new Dict("stmts",l);:}
+				| 				{:RESULT = new Dict("stmts",new Dict("list",new ArrayList<>()));:}
+				;
+stmt_list	::=	stmt_list:l stmt:x
+				{:
+					l.getDictArrayList("list").add(x);
+					RESULT = l;
+				:}
+				|stmt:x 			
+				{:
+					RESULT = new Dict("list",new ArrayList<Dict>(){{add(x);}});
+				:}
+				;
+
+stmt 		::=	method:x 	{:RESULT = x;:}
+				|comment:x 	{:RESULT = x;:}
+				|err:x		{:RESULT = x;:}
+				;
+
+method 		::= KW_VOID id:x LP RP LL method_stmts:ss RL
+				{:
+					Dict ref = new Dict("name",x,"stmts",ss);
+					RESULT = new Dict("nodo",new Node(TOperation.DEF_METHOD,null,null,ref));
+				:}
+				;
+
+method_stmts 	::=	method_stmt_list:x 	{:RESULT = x;:}
+					| 					{:RESULT = new Dict("list",new ArrayList<>());:}
+					;
+
+method_stmt_list 	::=	method_stmt_list:l method_stmt:x
+						{:
+							l.getDictArrayList("list").add(x);
+							RESULT = l;
+						:}
+						|method_stmt:x
+						{:
+							RESULT = new Dict("list",new ArrayList<Dict>(){{add(x);}});
+						:}
+						;
+
+method_stmt 	::=	stmt_label:x  			{:RESULT = x;:}
+					|expr_assign:x PCOMA 	{:RESULT = x;:}
+					|stmt_goto:x PCOMA		{:RESULT = x;:}
+					|stmt_print:x PCOMA 	{:RESULT = x;:}
+					|method_call:x PCOMA 	{:RESULT = x;:}
+					|stmt_if:x 				{:RESULT = x;:}
+					|err:x 					{:RESULT = x;:}
+					|comment:x 				{:RESULT = x;:}
+					;
+
+stmt_label	::=	id:x DPUNTOS 	
+				{:
+					Dict ref = new Dict("name",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-0));
+					RESULT = new Dict("nodo",new Node(TOperation.LABEL,null,null,ref));
+				:}
+				;
+
+stmt_goto 	::=	GOTO id:x
+				{:
+					Dict ref = new Dict("name",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
+					RESULT = new Dict(TOperation.GOTO,null,null,ref);
+				:}
+				;
+
+stmt_if 	::=	IF LP expr_rel:x RP  stmt_goto:g PCOMA
+				{:
+					Dict ref = new Dict("condition",x,"goto",g,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-4));
+					RESULT = new Dict(TOperation.STMT_IF,null,null,ref);
+				:}
+				;
+
+stmt_print 	::=	PRINT LP expr_primary_list:l RP
+				{:
+					Dict ref = new Dict("args",l,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+					RESULT = new Dict(TOperation.PRINT,null,null,ref);
+				:}
+				|PRINTLN LP expr_primary_list:l RP
+				{:
+					Dict ref = new Dict("args",l,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+					RESULT = new Dict(TOperation.PRINT,null,null,ref);
+				:}
+				;
+
+expr_primary_list 	::=	expr_primary_list:l COMA expr_primary:x
+						{:
+							l.getDictArrayList("list").add(x);
+							RESULT = l;
+						:}
+						|expr_primary:x
+						{:
+							RESULT = new Dict("list",new ArrayList<Dict>(){{add(x);}});
+						:}
+						;
+
+expr_assign ::=	id:x EQUAL expr_arith:v
+				{:
+					Dict ref = new Dict("name",x,"val",v,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
+					RESULT = new Dict("nodo",new Node(TOperation.SET_VAR,null,null,ref));
+				:} 
+				|memory:x EQUAL expr_arith:v
+				{:
+					Dict ref = new Dict("name",x,"val",v,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
+					RESULT = new Dict("nodo",new Node(TOperation.SET_VAR,null,null,ref));
+				:}
+				;
+
+expr_rel 	::=	expr_primary:l BTHAN expr_primary:r
+				|expr_primary:l LTHAN expr_primary:r
+				|expr_primary:l BETHAN expr_primary:r
+				|expr_primary:l LETHAN expr_primary:r
+				|expr_primary:l DEQUAL expr_primary:r
+				|expr_primary:l NEQUAL expr_primary:r
+				;
+
+expr_arith 	::=	expr_primary:l PLUS expr_primary:r
+				|expr_primary:l MINUS expr_primary:r
+				|expr_primary:l MULT expr_primary:r
+				|expr_primary:l DIV expr_primary:r
+				|expr_primary:l MOD expr_primary:r
+				|expr_primary:l EXP expr_primary:r
+				|expr_primary:l
+				{:
+					RESULT = l;
+				:}
+				;
+
+
+expr_primary	::=	id:x  			{:RESULT = x;:}
+					|stack:x 		{:RESULT = x;:}
+					|heap:x 		{:RESULT = x;:}
+					|s:x 			{:RESULT = x;:}
+					|h:x 			{:RESULT = x;:}
+					|int:x 			{:RESULT = x;:}
+					|float:x 		{:RESULT = x;:}
+					|char:x 		{:RESULT = x;:}
+					;
+
+method_call 	::=	id:x RP LP
+					{:
+						RESULT = new Dict("nodoe",new Node(TOperation.METHOD_CALL,null,null,new Dict("name",x)));
+					:}
+					;
+s 			::=	S:x
+				{:
+					Dict ref = new Dict("info",CUP$Parser$stack.peek(),"type","pointer","val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+h 			::= H:x
+				{:
+					Dict ref = new Dict("info",CUP$Parser$stack.peek(),"type","pointer","val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+
+memory 		::=	stack:x 	{:RESULT = x;:}
+				|heap:x 	{:RESULT = x;:}
+				;
+stack 		::=	STACK:m LS id:x RS
+				{:
+					Dict ref = new Dict("memory",m,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+heap 		::= HEAP:m LS id:x RS
+				{:
+					Dict ref = new Dict("memory",m,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+
+id 			::= ID:x
+				{:
+					Dict ref = new Dict("info",CUP$Parser$stack.peek(),"type",TType.REF,"val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+int 		::=	INT:x
+				{:
+					Dict ref = new Dict("info",CUP$Parser$stack.peek(),"type",TType.INT,"val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+float 		::=	FLOAT:x
+				{:
+					Dict ref = new Dict("info",CUP$Parser$stack.peek(),"type",TType.FLOAT,"val",x);
+					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
+				:}
+				;
+char 		::=	LP KW_CHAR RP expr_primary:x
+				{:
+					RESULT = new Dict("node",new Node(TOperation.LEAF,null,null,x));
+				:}
+				;
+
+error_lexico	::=	ERROR:x
+					{:
+						Dict ref = new Dict("info",parser.info,"val",x);
+						RESULT = new Dict("nodo",new Node(TOperation.ERROR_LEXICO,null,null,ref));
+					:}
+					;
+
+error_sintactico 	::=	error:x
+						{:
+							Dict ref = new Dict("info",parser.info,"val",x);
+							RESULT = new Dict("nodo",new Node(TOperation.ERROR_SINTACTICO,null,null,ref));
+						:}
+						;
+
+
+err 	::=	error_sintactico:x 	{:RESULT = x;:}
+			|error_lexico:x 	{:RESULT = x;:}
+			;
+
+comment 	::=	COMMENT:x
+				{:
+					RESULT = new Dict("nodo",new Node(TOperation.COMMENT,null,null,new Dict("val",x,"info",CUP$Parser$stack.peek())));
+				:}
+				;
