@@ -33,9 +33,7 @@ terminal        String 		ID,INT,PCOMA,DPUNTOS,EQUAL,DEQUAL,LTHAN,LETHAN,BTHAN,BE
 							PLUS,MINUS,MULT,DIV,LP,RP,GOTO,IF,LS,RS,PRINT_NUM,LL,RL,KW_CALL,
 							PRINTLN,HEAP,STACK,H,P,COMMENT,ERROR,MOD,EXP,FLOAT,KW_VOID,PRINT_CHAR,
 							KW_LINEA,KW_TEXTO,KW_ARCO,KW_RECTANGULO,KW_OVALO,KW_POLIGONO,KW_LIENZO,
-							THEN,PRINT_BOOLEAN,KW_INT2CHAR,KW_INT2FLOAT,KW_INT2STRING,KW_INT2BOOLEAN,
-							KW_FLOAT2STRING,KW_FLOAT2INT,KW_CHAR2INT,KW_CHAR2STRING,KW_STRING2INT,
-							KW_STRING2FLOAT,KW_STRING2CHAR,KW_STRING2BOOLEAN
+							THEN,PRINT_BOOLEAN
 							;
 non terminal    Dict        app,stmt,stmt_list,label,expr_assign,id,int,expr_arith,expr_rel,
 							expr_primary,stmt_goto,stmt_if,method_stmts_list,pointer,expr_unary,
@@ -66,7 +64,27 @@ stmt 		::=	method:x 	{:RESULT = x;:}
 
 method 		::= KW_VOID id:x LP RP LL method_stmts:ss RL
 				{:
-					Dict ref = new Dict("name",x,"stmts",ss,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-6));
+					final ArrayList<Dict> stmts_new = new ArrayList<>();
+					ArrayList<Dict> stmts_label = null;
+
+					for(Dict stmt : ss.getDictArrayList("list")){
+						final Node stmt_node = stmt.getNode("nodo");
+						final TOperation stmt_node_operation = (TOperation) stmt_node.getOperation();
+
+						if(stmt_node_operation == TOperation.LABEL){
+							stmts_label = new ArrayList<>();
+							stmt_node.getDictRef().put("stmts",stmts_label);
+							continue;
+						}
+						if(stmts_label == null){
+							stmts_new.add(stmt);
+							continue;
+						}
+						stmts_label.add(stmt);
+					}
+
+
+					Dict ref = new Dict("name",x,"stmts",new Dict("list",stmts_new),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-6));
 					RESULT = new Dict("nodo",new Node(TOperation.DEF_METHOD,null,null,ref));
 				:}
 				;
@@ -78,29 +96,12 @@ method_stmts 	::=	method_stmt_list:x 	{:RESULT = x;:}
 
 method_stmt_list 	::=	method_stmt_list:l method_stmt:x
 						{:
-							final ArrayList<Dict> list = l.getDictArrayList("list");
-							final Node x_node = x.getNode("nodo");
-							final TOperation x_node_operation = (TOperation) x_node.getOperation();
-
-							if(x_node_operation == TOperation.LABEL){
-								x_node.getDictRef().put("position",list.size());
-							}
-							list.add(x);
-
+							l.getDictArrayList("list").add(x);
 							RESULT = l;
 						:}
 						|method_stmt:x
 						{:
-							final ArrayList<Dict> list = new ArrayList<>();
-							final Node x_node = x.getNode("nodo");
-							final TOperation x_node_operation = (TOperation) x_node.getOperation();
-
-							if(x_node_operation == TOperation.LABEL){
-								x_node.getDictRef().put("position",list.size());
-							}
-							list.add(x);
-
-							RESULT = new Dict("list",list);
+							RESULT = new Dict("list",new ArrayList<Dict>(){{add(x);}});
 						:}
 						;
 
@@ -123,14 +124,14 @@ label	::=	id:x DPUNTOS
 stmt_goto 	::=	GOTO id:x
 				{:
 					Dict ref = new Dict("name",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
-					RESULT = new Dict("nodo",new Node(TOperation.GOTO,null,null,ref));
+					RESULT = new Dict(TOperation.GOTO,null,null,ref);
 				:}
 				;
 
 stmt_if 	::=	IF  expr_rel:x  THEN  stmt_goto:g PCOMA
 				{:
 					Dict ref = new Dict("condition",x,"goto",g,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-4));
-					RESULT = new Dict("nodo",new Node(TOperation.STMT_IF,x.getNode("nodo"),null,ref));
+					RESULT = new Dict(TOperation.STMT_IF,null,null,ref);
 				:}
 				;
 

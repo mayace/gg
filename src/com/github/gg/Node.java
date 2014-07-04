@@ -39,7 +39,11 @@ public class Node {
             Dict cations = (Dict) actions;
 
             HashMap<Object, Operation> o = (HashMap<Object, Operation>) cations.get("operations");
-            setVal(o.get(getOperation()).exec(this, actions));
+            if (o.containsKey(getOperation())) {
+                setVal(o.get(getOperation()).exec(this, actions));
+            } else {
+                System.err.println("No existe operacion registrada para procesar el nodo con opercion - >  " + getOperation());
+            }
         }
     }
 
@@ -101,5 +105,4 @@ public class Node {
         this.autoexec = autoexec;
     }
 
-    
 }

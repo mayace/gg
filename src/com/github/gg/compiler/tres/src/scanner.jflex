@@ -61,7 +61,7 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     "*"                 {return symbol(Sym.MULT);}
     "/"                 {return symbol(Sym.DIV);}
     "%"                 {return symbol(Sym.MOD);}
-    "^"                 {return symbol(Sym.EXP);}
+    // "^"                 {return symbol(Sym.EXP);}
     
     // "char"              {return symbol(Sym.KW_CHAR);}
     "void"              {return symbol(Sym.KW_VOID);}
@@ -69,13 +69,16 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     // "int"               {return symbol(Sym.KW_INT);}
     "p"                 {return symbol(Sym.P);}
     "h"                 {return symbol(Sym.H);}
-    "pila"              {return symbol(Sym.STACK);}
+    "stack"              {return symbol(Sym.STACK);}
     "heap"              {return symbol(Sym.HEAP);}
     "goto"              {return symbol(Sym.GOTO);}
     "if"                {return symbol(Sym.IF);}
+    "then"                {return symbol(Sym.THEN);}
 
-    "print"             {return symbol(Sym.PRINT);}
-    "println"           {return symbol(Sym.PRINTLN);}
+
+    "printNum"          {return symbol(Sym.PRINT_NUM);}
+    "printBoolean"      {return symbol(Sym.PRINT_BOOLEAN);}
+    "printChar"         {return symbol(Sym.PRINT_CHAR);}
     "linea"             {return symbol(Sym.KW_LINEA);}
     "texto"             {return symbol(Sym.KW_TEXTO);}
     "arco"              {return symbol(Sym.KW_ARCO);}
@@ -84,6 +87,18 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     "poligono"          {return symbol(Sym.KW_POLIGONO);}
     "lienzo"            {return symbol(Sym.KW_LIENZO);}
 
+    "int_to_char"       {return symbol(Sym.KW_INT2CHAR);}
+    "int_to_float"      {return symbol(Sym.KW_INT2FLOAT);}
+    "int_to_string"     {return symbol(Sym.KW_INT2STRING);}
+    "int_to_boolean"    {return symbol(Sym.KW_INT2BOOLEAN);}
+    "float_to_string"   {return symbol(Sym.KW_FLOAT2STRING);}
+    "float_to_int"      {return symbol(Sym.KW_FLOAT2INT);}
+    "char_to_int"       {return symbol(Sym.KW_CHAR2INT);}
+    "char_to_string"    {return symbol(Sym.KW_CHAR2STRING);}
+    "string_to_int"     {return symbol(Sym.KW_STRING2INT);}
+    "string_to_float"   {return symbol(Sym.KW_STRING2FLOAT);}
+    "string_to_char"    {return symbol(Sym.KW_STRING2CHAR);}
+    "string_to_boolean" {return symbol(Sym.KW_STRING2BOOLEAN);}
 
     {FLOAT}             {return symbol(Sym.FLOAT);}
     {INT}               {return symbol(Sym.INT);}
