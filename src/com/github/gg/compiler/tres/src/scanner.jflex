@@ -99,6 +99,8 @@ SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
     "string_to_float"   {return symbol(Sym.KW_STRING2FLOAT);}
     "string_to_char"    {return symbol(Sym.KW_STRING2CHAR);}
     "string_to_boolean" {return symbol(Sym.KW_STRING2BOOLEAN);}
+    "boolean_to_string" {return symbol(Sym.KW_BOOLEAN2STRING);}
+    "boolean_to_int"    {return symbol(Sym.KW_BOOLEAN2INT);}
 
     {FLOAT}             {return symbol(Sym.FLOAT);}
     {INT}               {return symbol(Sym.INT);}

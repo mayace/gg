@@ -35,7 +35,8 @@ terminal        String 		ID,INT,PCOMA,DPUNTOS,EQUAL,DEQUAL,LTHAN,LETHAN,BTHAN,BE
 							KW_LINEA,KW_TEXTO,KW_ARCO,KW_RECTANGULO,KW_OVALO,KW_POLIGONO,KW_LIENZO,
 							THEN,PRINT_BOOLEAN,KW_INT2CHAR,KW_INT2FLOAT,KW_INT2STRING,KW_INT2BOOLEAN,
 							KW_FLOAT2STRING,KW_FLOAT2INT,KW_CHAR2INT,KW_CHAR2STRING,KW_STRING2INT,
-							KW_STRING2FLOAT,KW_STRING2CHAR,KW_STRING2BOOLEAN
+							KW_STRING2FLOAT,KW_STRING2CHAR,KW_STRING2BOOLEAN,KW_BOOLEAN2STRING,
+							KW_BOOLEAN2INT
 							;
 non terminal    Dict        app,stmt,stmt_list,label,expr_assign,id,int,expr_arith,expr_rel,
 							expr_primary,stmt_goto,stmt_if,method_stmts_list,pointer,expr_unary,
@@ -288,6 +289,76 @@ method_call 	::=	KW_CALL id:x LP RP
 					{:
 	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
 	  					RESULT = new Dict("nodo",new Node(TOperation.NM_LIENZO,null,null,ref));
+	  				:}
+	  				|KW_CALL KW_INT2CHAR:x LP RP
+	  				{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_INT2CHAR,null,null,ref));
+	  				:}
+	  				|KW_CALL KW_INT2FLOAT:x LP RP
+	  				{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_INT2FLOAT,null,null,ref));
+	  				:}
+	  				|KW_CALL KW_INT2STRING:x LP RP
+	  				{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_INT2STRING,null,null,ref));
+	  				:}
+	  				|KW_CALL KW_INT2BOOLEAN:x LP RP
+	  				{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_INT2BOOLEAN,null,null,ref));
+	  				:}
+					|KW_CALL KW_FLOAT2STRING:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_FLOAT2STRING,null,null,ref));
+	  				:}
+					|KW_CALL KW_FLOAT2INT:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_FLOAT2INT,null,null,ref));
+	  				:}
+					|KW_CALL KW_CHAR2INT:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_CHAR2INT,null,null,ref));
+	  				:}
+					|KW_CALL KW_CHAR2STRING:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_CHAR2STRING,null,null,ref));
+	  				:}
+					|KW_CALL KW_STRING2INT:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_STRING2INT,null,null,ref));
+	  				:}
+					|KW_CALL KW_STRING2FLOAT:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_STRING2FLOAT,null,null,ref));
+	  				:}
+					|KW_CALL KW_STRING2CHAR:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_STRING2CHAR,null,null,ref));
+	  				:}
+					|KW_CALL KW_STRING2BOOLEAN:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_STRING2BOOLEAN,null,null,ref));
+	  				:}
+					|KW_CALL KW_BOOLEAN2STRING:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_BOOLEAN2STRING,null,null,ref));
+	  				:}
+					|KW_CALL KW_BOOLEAN2INT:x LP RP
+					{:
+	  					Dict ref = new Dict("name",new Dict("val",x,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-2)),"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3));
+	  					RESULT = new Dict("nodo",new Node(TOperation.CAST_BOOLEAN2INT,null,null,ref));
 	  				:}
 					;
 p 			::=	P:x
