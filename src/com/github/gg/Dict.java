@@ -9,10 +9,10 @@ import java.util.Stack;
 
 public class Dict extends HashMap<String, Object> {
 
-   public float getFloat(String k){
+    public float getFloat(String k) {
         return Float.parseFloat(getString(k));
     }
-    
+
     public Dict() {
 
     }
@@ -47,25 +47,25 @@ public class Dict extends HashMap<String, Object> {
         final Object val = get(k);
         return (val == null ? null : val.toString());
     }
-    
+
     public TType getType(String k) {
-        final Object val = (TType)get(k);
-        return (val == null ? null : (TType)val);
+        final Object val = (TType) get(k);
+        return (val == null ? null : (TType) val);
     }
-    
+
     public BloqueCondicion getTags(String k) {
-        final Object val = (BloqueCondicion)get(k);
-        return (val == null ? null : (BloqueCondicion)val);
+        final Object val = (BloqueCondicion) get(k);
+        return (val == null ? null : (BloqueCondicion) val);
     }
-    
+
     public String getCodigo3D(String k) {
         final Object val = get(k);
         return (val == null ? null : val.toString());
     }
 
     public int getLenth(String k) {
-        final Object val = (int)get(k);
-        return (val == null ? null : (int)val);
+        final Object val = (int) get(k);
+        return (val == null ? null : (int) val);
     }
 
     public Dict getDict(String k) {
@@ -111,7 +111,7 @@ public class Dict extends HashMap<String, Object> {
             //<editor-fold defaultstate="collapsed" desc="ARRAYS...">
             if (value instanceof Object[]) {
                 sb.append(Arrays.toString((Object[]) value));
-            } else if (value instanceof int[]){
+            } else if (value instanceof int[]) {
                 sb.append(Arrays.toString((int[]) value));
             } else {
                 sb.append(value);
@@ -129,12 +129,19 @@ public class Dict extends HashMap<String, Object> {
     }
 
     public int getInt(String k) {
-        return Integer.parseInt(getString(k));
+        final String val = getString(k);
+        return val == null ? null : Integer.parseInt(val);
+    }
+
+    public Integer getInteger(String k) {
+        final String val = getString(k);
+        return val == null ? null : new Integer(val);
     }
 
     public Object[] getObjArray(String k) {
         return (Object[]) get(k);
     }
+
     public int[] getIntArray(String k) {
         return (int[]) get(k);
     }

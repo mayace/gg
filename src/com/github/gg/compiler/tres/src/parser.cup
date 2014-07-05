@@ -153,32 +153,32 @@ expr_assign ::=	id:x EQUAL expr_arith:v
 				:}
 				;
 
-expr_rel 	::=	expr_primary:l BTHAN expr_primary:r
+expr_rel 	::=	expr_unary:l BTHAN expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.BTHAN,l.getNode("nodo"),r.getNode("nodo"),ref));
 				:}
-				|expr_primary:l LTHAN expr_primary:r
+				|expr_unary:l LTHAN expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.LTHAN,l.getNode("nodo"),r.getNode("nodo"),ref));
 				:}
-				|expr_primary:l BETHAN expr_primary:r
+				|expr_unary:l BETHAN expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.BETHAN,l.getNode("nodo"),r.getNode("nodo"),ref));
 				:}
-				|expr_primary:l LETHAN expr_primary:r
+				|expr_unary:l LETHAN expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.LETHAN,l.getNode("nodo"),r.getNode("nodo"),ref));
 				:}
-				|expr_primary:l DEQUAL expr_primary:r
+				|expr_unary:l DEQUAL expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.DEQUAL,l.getNode("nodo"),r.getNode("nodo"),ref));
 				:}
-				|expr_primary:l NEQUAL expr_primary:r
+				|expr_unary:l NEQUAL expr_unary:r
 				{:
 					Dict ref = new Dict("info",CUP$Parser$stack.elementAt(CUP$Parser$top-1));
 					RESULT = new Dict("nodo",new Node(TOperation.NEQUAL,l.getNode("nodo"),r.getNode("nodo"),ref));

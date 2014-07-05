@@ -29,7 +29,7 @@ INT             =   {DIGIT}+
 FLOAT           =   {INT}"."{INT}
 ID              =   [:jletter:] [:jletterdigit:]*
 
-SIMPLE_COMMENT  =   "//"[^\*\n\r]*{NEWLINE}
+SIMPLE_COMMENT  =   "//"[^\n\r]*{NEWLINE}
 
 %%
 

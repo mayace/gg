@@ -108,7 +108,7 @@ public class TabSim extends HashMap<String, Sim> {
 
     public void addParameter(Sim method_sim, boolean ref, String type, String name, Dict others) {
         final Dict method_others = (Dict) method_sim.others;
-        String key = getKey4parameter(method_sim.name, name, method_others.get("overload"));
+        String key = getKey4parameter(method_sim.name, name, method_others.getObjArray("overload"));
 
         if (containsKey(key)) {
             throw new UnsupportedOperationException("Ya existe la variable -> '" + name + "'");
