@@ -53,9 +53,9 @@ public class Dict extends HashMap<String, Object> {
         return (val == null ? null : (TType) val);
     }
 
-    public BloqueCondicion getTags(String k) {
-        final Object val = (BloqueCondicion) get(k);
-        return (val == null ? null : (BloqueCondicion) val);
+    public TagSet getTags(String k) {
+        final Object val = (TagSet) get(k);
+        return (val == null ? null : (TagSet) val);
     }
 
     public String getCodigo3D(String k) {
