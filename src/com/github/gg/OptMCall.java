@@ -2,8 +2,8 @@ package com.github.gg;
 
 public class OptMCall {
 
-    public Object name;
-    public boolean reserved = false;
+    public final Object name;
+    public final boolean reserved = false;
 
     public OptMCall(Object name) {
         this.name = name;

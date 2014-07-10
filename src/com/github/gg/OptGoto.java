@@ -2,7 +2,7 @@ package com.github.gg;
 
 public class OptGoto {
 
-    public Object label;
+    public final Object label;
 
     public OptGoto(Object label) {
         this.label = label;

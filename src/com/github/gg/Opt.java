@@ -72,33 +72,64 @@ public class Opt {
         Dict res;
         int res_count;
         ArrayList res_bblock = bblock;
+        int i = 0;
 
         do {
+            //eviar bucle infinito
+            if (i == 100) {
+                break;
+            }
+            i++;
 
             // subexpresiones comunes
             res = optbb_subexpr(res_bblock);
             res_count = res.getInt(kcount);
             res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("subexpr -> %d", res_count));
             if (res_count > 0) {
                 continue;
             }
 
             // propagacion de copias
-//             res = optbb_pcopias(res_bblock);
-//            res_count = res.getInt(kcount);
-//            res_bblock = res.getArrayList(kbblock);
-//            if (res_count > 0) {
-//                continue;
-//            }
-//            eliminacion codigo muerto res = optbb_codmuerto(res_bblock);
-//            res_count = res.getInt(kcount);
-//            res_bblock = res.getArrayList(kbblock);
-//            if (res_count > 0) {
-//                continue;
-//            }
+            res = optbb_pcopias(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("pcopias -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+
+            //eliminacion codigo muerto 
+            res = optbb_codmuerto(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("codmuerto -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+
+            //simplificacion con onperadores identidad
+            res = optbb_identidad(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("identidad -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+
+            //simplificacion con onperadores identidad
+            res = optbb_itencidad(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("intencidad -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+
             return res_bblock;
         } while (true);
 
+        return res_bblock;
     }
 
     public Dict optbb_subexpr(final Object bb) {
@@ -141,7 +172,8 @@ public class Opt {
             if (obj instanceof OptAssign) {
                 final OptAssign opta = (OptAssign) obj;
                 final Object opta_name = opta.name;
-                final OptExpr opta_val = (OptExpr) opta.val;
+
+                final OptExpr opta_val = opta.val instanceof OptExpr ? (OptExpr) opta.val : new OptExpr(null, opta.val, null);
 
                 final Object o = opta_val.o;
                 Object l = opta_val.l;
@@ -233,6 +265,7 @@ public class Opt {
         for (Object obj : bblock) {
             if (obj instanceof OptAssign) {
                 final OptAssign opta = (OptAssign) obj;
+                final Object opta_name = opta.name;
                 final OptExpr opta_val = (OptExpr) opta.val;
                 final Object opta_val_l = opta_val.l;
                 final Object opta_val_r = opta_val.r;
@@ -241,11 +274,21 @@ public class Opt {
                 if (temps.containsKey(lkey)) {
                     temps.put(lkey, temps.getInt(lkey) + 1);
                 }
-                final String rkey = opta_val_r.toString();
-                if (opta_val_r != null && temps.containsKey(rkey)) {
+
+                String rkey = null;
+                if (opta_val_r != null && temps.containsKey(rkey = opta_val_r.toString())) {
                     temps.put(rkey, temps.getInt(rkey) + 1);
                 }
 
+                //si la asignacion es a memoria usa un temporal
+                if (opta_name instanceof OptMemory) {
+                    final OptMemory opta_name_memory = (OptMemory) opta_name;
+                    final Object opta_name_memory_position = opta_name_memory.position;
+                    final String mkey = opta_name_memory_position.toString();
+                    if(temps.containsKey(mkey)){
+                        temps.put(mkey, temps.getInt(mkey) + 1);
+                    }
+                }
                 continue;
             }
             if (obj instanceof OptIf) {
@@ -285,9 +328,14 @@ public class Opt {
                 final OptAssign opta = (OptAssign) obj;
                 final Object opta_name = opta.name;
 
+                if (opta_name instanceof OptMemory) {
+                    bblock_new.add(obj);
+                    continue;
+                }
                 final String key = opta_name.toString();
                 final int refcount = temps.getInt(key);
                 if (refcount == 0) {
+
                     continue;
                 }
             }
@@ -360,29 +408,31 @@ public class Opt {
         }
 
         final String opte_o_str = opte_o.toString();
+        final Double l_num = getDouble(opte_l);
+        final Double r_num = getDouble(opte_r);
 
         if (opte_o_str.equals("+") || opte_o_str.equals("-")) {
-            if (getDouble(opte_l) == 0) {
+            if (l_num != null && l_num == 0) {
                 return opte_r;
             }
-            if (getDouble(opte_r) == 0) {
+            if (r_num != null && r_num == 0) {
                 return opte_l;
             }
             return null;
         }
 
         if (opte_o_str.equals("*")) {
-            if (getDouble(opte_l) == 1) {
+            if (l_num != null && l_num == 1) {
                 return opte_r;
             }
-            if (getDouble(opte_r) == 1) {
+            if (r_num != null && r_num == 1) {
                 return opte_l;
             }
             return null;
         }
 
         if (opte_o_str.equals("/")) {
-            if (getDouble(opte_r) == 1) {
+            if (r_num != null && r_num == 1) {
                 return opte_l;
             }
             return null;
@@ -414,12 +464,14 @@ public class Opt {
         }
 
         final String opte_o_str = opte_o.toString();
+        final Double l_num = getDouble(opte_l);
+        final Double r_num = getDouble(opte_r);
 
         if (opte_o_str.equals("*")) {
-            if (getDouble(opte_l) == 2) {
+            if (l_num != null && l_num == 2) {
                 return new OptExpr(opte_o, opte_r, opte_r);
             }
-            if (getDouble(opte_r) == 2) {
+            if (r_num != null && r_num == 2) {
                 return new OptExpr(opte_o, opte_l, opte_l);
             }
             return null;

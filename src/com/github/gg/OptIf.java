@@ -2,8 +2,8 @@ package com.github.gg;
 
 public class OptIf {
 
-    public Object expr;
-    public Object goto_true;
+    public final Object expr;
+    public final Object goto_true;
 
     public OptIf(Object expr, Object goto_true) {
         this.expr = expr;

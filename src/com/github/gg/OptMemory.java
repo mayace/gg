@@ -2,8 +2,8 @@ package com.github.gg;
 
 public class OptMemory {
 
-    public Object memory;
-    public Object position;
+    final public Object memory;
+    final public Object position;
 
     public OptMemory(Object memory, Object position) {
         this.memory = memory;
