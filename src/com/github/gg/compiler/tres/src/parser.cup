@@ -382,13 +382,13 @@ memory 		::=	stack:x 	{:RESULT = x;:}
 				;
 stack 		::=	STACK:m LS id:x RS
 				{:
-					Dict ref = new Dict("memory",Sym.STACK,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"position",x,"type","memory");
+					Dict ref = new Dict("memory",Sym.STACK,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"position",x,"type","memory","name",m);
 					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
 				:}
 				;
 heap 		::= HEAP:m LS id:x RS
 				{:
-					Dict ref = new Dict("memory",Sym.HEAP ,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"position",x,"type","memory");
+					Dict ref = new Dict("memory",Sym.HEAP ,"info",CUP$Parser$stack.elementAt(CUP$Parser$top-3),"position",x,"type","memory","name",m);
 					RESULT = new Dict("nodo",new Node(TOperation.LEAF,null,null,ref));
 				:}
 				;

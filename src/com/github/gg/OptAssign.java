@@ -2,8 +2,8 @@ package com.github.gg;
 
 public class OptAssign {
 
-    public Object name;
-    public Object val;
+    final public Object name;
+    final public Object val;
 
     public OptAssign(Object name, Object val) {
         this.name = name;
