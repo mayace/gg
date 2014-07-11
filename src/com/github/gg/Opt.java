@@ -144,13 +144,17 @@ public class Opt {
                 final Object name = opta.name;
                 Object val = opta.val;
 
-                if (assigns.containsKey(val.toString())) {
-                    val = assigns.get(val.toString());
+                final String key = val.toString();
+                if (assigns.containsKey(key)) {
+                    val = assigns.get(key);
                     bblock_new.add(new OptAssign(name, new OptExpr(null, val, null)));
                     count++;
                     continue;
                 }
-                assigns.put(val.toString(), name);
+                // si no es constante comparar..
+                if (getDouble(key) == null) {
+                    assigns.put(key, name);
+                }
                 bblock_new.add(opta);
                 continue;
             }
@@ -226,9 +230,12 @@ public class Opt {
                 final Object optm_position = optm.position;
 
                 Object p = optm_position;
+                final String pkey = p.toString();
+                if (temps.containsKey(pkey)) {
+                    final Object pval = temps.get(pkey);
 
-                if (temps.containsKey(p.toString())) {
-                    p = temps.get(p.toString());
+                    //porque la gramtica no perminte constantes en el indice de memoria
+                    p = getDouble(pval) == null ? pval : p;
                     count++;
                 }
 
@@ -255,9 +262,11 @@ public class Opt {
                 final OptAssign opta = (OptAssign) obj;
                 final Object opta_name = opta.name;
 
-                if (!temps.containsKey(opta_name.toString())) {
-                    temps.put(opta_name.toString(), 0);
+                if (!(opta_name instanceof OptMemory)) {
+                    final String key = opta_name.toString();
+                    temps.put(key, 0);
                 }
+
             }
         }
 
@@ -285,7 +294,7 @@ public class Opt {
                     final OptMemory opta_name_memory = (OptMemory) opta_name;
                     final Object opta_name_memory_position = opta_name_memory.position;
                     final String mkey = opta_name_memory_position.toString();
-                    if(temps.containsKey(mkey)){
+                    if (temps.containsKey(mkey)) {
                         temps.put(mkey, temps.getInt(mkey) + 1);
                     }
                 }
@@ -335,7 +344,7 @@ public class Opt {
                 final String key = opta_name.toString();
                 final int refcount = temps.getInt(key);
                 if (refcount == 0) {
-
+                    count++;
                     continue;
                 }
             }
@@ -488,32 +497,38 @@ public class Opt {
         int count = 0;
 
         for (Object obj : bblock) {
+
             if (obj instanceof OptAssign) {
                 final OptAssign opta = (OptAssign) obj;
                 final Object opta_name = opta.name;
                 final OptExpr opta_val = (OptExpr) opta.val;
 
-                final Object o = opta_val.o;
-                Object l = opta_val.l;
-                Object r = opta_val.r;
+                final String opta_val_o = opta_val.o.toString();
+                final Double opta_val_l = getDouble(opta_val.l);
+                final Double opta_val_r = getDouble(opta_val.r);
 
-                if (temps.containsKey(l.toString())) {
-                    l = temps.get(l.toString());
-                    count++;
+                if (opta_val_l != null && opta_val_r != null) {
+                    Object res = null;
+
+                    switch (opta_val_o) {
+                        case "+":
+                            res = opta_val_l + opta_val_r;
+                            break;
+                        case "-":
+                            res = opta_val_l - opta_val_r;
+                            break;
+                        case "*":
+                            res = opta_val_l * opta_val_r;
+                            break;
+                        case "/":
+                            res = opta_val_l / opta_val_r;
+                            break;
+                        default:
+                        //operacion no soportada
+                    }
+
                 }
-                if (r != null && temps.containsKey(r.toString())) {
-                    r = temps.get(r.toString());
-                    count++;
-                }
 
-                final OptExpr opte_new = new OptExpr(o, l, r);
-                final OptAssign opta_new = new OptAssign(opta_name, opte_new);
-
-                if (opte_new.r == null) {
-                    temps.put(opta_new.name.toString(), opte_new.l);
-                }
-
-                bblock_new.add(opta_new);
                 continue;
             }
             if (obj instanceof OptIf) {
