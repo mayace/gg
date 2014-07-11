@@ -560,4 +560,76 @@ public class Opt {
 
         return new Dict("bblock", bblock_new, "count", count);
     }
+    
+    public LinkedHashMap BloqueGlobal() {
+        final LinkedHashMap<String, LinkedHashMap> methods_new = new LinkedHashMap<>();
+        final LinkedHashMap<String, LinkedHashMap> methods = (LinkedHashMap) this.app;
+        for (Map.Entry<String, LinkedHashMap> method : methods.entrySet()) {
+            final String mname = method.getKey();
+            final LinkedHashMap<String, ArrayList> labels = method.getValue();
+            final LinkedHashMap<String, ArrayList> labels_new = new LinkedHashMap<>();
+            ArrayList Global = new ArrayList();
+            for (Map.Entry<String, ArrayList> label : labels.entrySet()) {
+                final String lname = label.getKey();
+                String tag = "";
+                if (!lname.isEmpty()){
+                    tag = lname + ":";
+                }
+                
+                final ArrayList stmts = label.getValue();
+                Global.add(tag);
+                for (int i = 0; i < stmts.size(); i++) {
+                    Object stmt = stmts.get(i);
+                    Global.add(stmt);
+                }
+                
+            }
+            labels_new.put("", optbbG(Global));
+            methods_new.put(mname, labels_new);
+        }
+
+        return methods_new;
+    }
+    
+    
+    public ArrayList optbbG(final Object bb) {
+        final ArrayList bblock = (ArrayList) bb;
+        final String kcount = "count";
+        final String kbblock = "bblock";
+
+        Dict res;
+        int res_count;
+        ArrayList res_bblock = bblock;
+        int i = 0;
+
+        do {
+            //eviar bucle infinito
+            if (i == 100) {
+                break;
+            }
+            i++;
+
+            // subexpresiones comunes
+            res = optbb_subexpr(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("subexpr -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+
+            // propagacion de copias
+            res = optbb_pcopias(res_bblock);
+            res_count = res.getInt(kcount);
+            res_bblock = res.getArrayList(kbblock);
+            System.out.println(String.format("pcopias -> %d", res_count));
+            if (res_count > 0) {
+                continue;
+            }
+            return res_bblock;
+        } while (true);
+
+        return res_bblock;
+    }
+    
 }
