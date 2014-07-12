@@ -1,11 +1,10 @@
 package com.github.gg;
 
-import com.github.gg.Dict;
-import com.github.gg.OptAssign;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Opt {
 
@@ -15,7 +14,7 @@ public class Opt {
         this.app = app;
     }
 
-    public String getString(final LinkedHashMap app) {
+    public static String getString(final LinkedHashMap app) {
         StringBuilder builder = new StringBuilder();
         final LinkedHashMap<String, LinkedHashMap> methods = (LinkedHashMap) app;
         for (Map.Entry<String, LinkedHashMap> method : methods.entrySet()) {
@@ -75,11 +74,17 @@ public class Opt {
         int i = 0;
 
         do {
-            //eviar bucle infinito
+
+                //eviar bucle infinito
             if (i == 100) {
-                break;
+                return res_bblock;
             }
             i++;
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException ex) {
+//                Logger.getLogger(Opt.class.getName()).log(Level.SEVERE, null, ex);
+//            }
 
             // subexpresiones comunes
             res = optbb_subexpr(res_bblock);
@@ -98,38 +103,36 @@ public class Opt {
             if (res_count > 0) {
                 continue;
             }
-
-            //eliminacion codigo muerto 
-            res = optbb_codmuerto(res_bblock);
-            res_count = res.getInt(kcount);
-            res_bblock = res.getArrayList(kbblock);
-            System.out.println(String.format("codmuerto -> %d", res_count));
-            if (res_count > 0) {
-                continue;
-            }
-
-            //simplificacion con onperadores identidad
-            res = optbb_identidad(res_bblock);
-            res_count = res.getInt(kcount);
-            res_bblock = res.getArrayList(kbblock);
-            System.out.println(String.format("identidad -> %d", res_count));
-            if (res_count > 0) {
-                continue;
-            }
-
-            //simplificacion con onperadores identidad
-            res = optbb_itencidad(res_bblock);
-            res_count = res.getInt(kcount);
-            res_bblock = res.getArrayList(kbblock);
-            System.out.println(String.format("intencidad -> %d", res_count));
-            if (res_count > 0) {
-                continue;
-            }
-
+//
+//            //eliminacion codigo muerto 
+//            res = optbb_codmuerto(res_bblock);
+//            res_count = res.getInt(kcount);
+//            res_bblock = res.getArrayList(kbblock);
+//            System.out.println(String.format("codmuerto -> %d", res_count));
+//            if (res_count > 0) {
+//                continue;
+//            }
+//
+//            //simplificacion con onperadores identidad
+//            res = optbb_identidad(res_bblock);
+//            res_count = res.getInt(kcount);
+//            res_bblock = res.getArrayList(kbblock);
+//            System.out.println(String.format("identidad -> %d", res_count));
+//            if (res_count > 0) {
+//                continue;
+//            }
+//
+//            //simplificacion con onperadores identidad
+//            res = optbb_itencidad(res_bblock);
+//            res_count = res.getInt(kcount);
+//            res_bblock = res.getArrayList(kbblock);
+//            System.out.println(String.format("intencidad -> %d", res_count));
+//            if (res_count > 0) {
+//                continue;
+//            }
             return res_bblock;
         } while (true);
 
-        return res_bblock;
     }
 
     public Dict optbb_subexpr(final Object bb) {
@@ -149,10 +152,12 @@ public class Opt {
                     val = assigns.get(key);
                     bblock_new.add(new OptAssign(name, new OptExpr(null, val, null)));
                     count++;
+//                    System.out.println(obj);
+//                    System.out.println("----");
                     continue;
                 }
-                // si no es constante comparar..
-                if (getDouble(key) == null) {
+                // si no es constante comparar.. o no es p,h
+                if (getDouble(key) == null && !name.toString().equals("p") && !name.toString().equals("h")) {
                     assigns.put(key, name);
                 }
                 bblock_new.add(opta);
@@ -180,69 +185,73 @@ public class Opt {
                 final OptExpr opta_val = opta.val instanceof OptExpr ? (OptExpr) opta.val : new OptExpr(null, opta.val, null);
 
                 final Object o = opta_val.o;
-                Object l = opta_val.l;
-                Object r = opta_val.r;
+                Object l_new = opta_val.l;
+                Object r_new = opta_val.r;
 
-                if (temps.containsKey(l.toString())) {
-                    l = temps.get(l.toString());
+                if (temps.containsKey(l_new.toString())) {
+                    l_new = temps.get(l_new.toString());
                     count++;
+                    System.err.println(obj);
+                    System.err.println("----");
                 }
-                if (r != null && temps.containsKey(r.toString())) {
-                    r = temps.get(r.toString());
+                if (r_new != null && temps.containsKey(r_new.toString())) {
+                    r_new = temps.get(r_new.toString());
                     count++;
+                    System.err.println(obj);
+                    System.err.println("----");
                 }
 
-                final OptExpr opte_new = new OptExpr(o, l, r);
+                final OptExpr opte_new = new OptExpr(o, l_new, r_new);
                 final OptAssign opta_new = new OptAssign(opta_name, opte_new);
 
-                if (opte_new.r == null) {
+                if (opte_new.r == null && !(l_new instanceof OptMemory)) {
                     temps.put(opta_new.name.toString(), opte_new.l);
                 }
 
                 bblock_new.add(opta_new);
                 continue;
             }
-            if (obj instanceof OptIf) {
-                final OptIf opti = (OptIf) obj;
-                final OptExpr opti_expr = (OptExpr) opti.expr;
-                final Object opti_gotot = opti.goto_true;
-                Object o = opti_expr.o;
-                Object l = opti_expr;
-                Object r = opti_expr;
-
-                if (temps.containsKey(l.toString())) {
-                    l = temps.get(l.toString());
-                    count++;
-                }
-                if (temps.containsKey(r.toString())) {
-                    r = temps.get(r.toString());
-                    count++;
-                }
-
-                final OptIf opti_new = new OptIf(new OptExpr(o, l, r), opti_gotot);
-
-                bblock_new.add(opti_new);
-                continue;
-            }
-            if (obj instanceof OptMemory) {
-                final OptMemory optm = (OptMemory) obj;
-                final Object optm_memory = optm.memory;
-                final Object optm_position = optm.position;
-
-                Object p = optm_position;
-                final String pkey = p.toString();
-                if (temps.containsKey(pkey)) {
-                    final Object pval = temps.get(pkey);
-
-                    //porque la gramtica no perminte constantes en el indice de memoria
-                    p = getDouble(pval) == null ? pval : p;
-                    count++;
-                }
-
-                final OptMemory optm_new = new OptMemory(optm_memory, p);
-                bblock_new.add(optm_new);
-                continue;
-            }
+//            if (obj instanceof OptIf) {
+//                final OptIf opti = (OptIf) obj;
+//                final OptExpr opti_expr = (OptExpr) opti.expr;
+//                final Object opti_gotot = opti.goto_true;
+//                Object o = opti_expr.o;
+//                Object l = opti_expr;
+//                Object r = opti_expr;
+//
+//                if (temps.containsKey(l.toString())) {
+//                    l = temps.get(l.toString());
+//                    count++;
+//                }
+//                if (temps.containsKey(r.toString())) {
+//                    r = temps.get(r.toString());
+//                    count++;
+//                }
+//
+//                final OptIf opti_new = new OptIf(new OptExpr(o, l, r), opti_gotot);
+//
+//                bblock_new.add(opti_new);
+//                continue;
+//            }
+//            if (obj instanceof OptMemory) {
+//                final OptMemory optm = (OptMemory) obj;
+//                final Object optm_memory = optm.memory;
+//                final Object optm_position = optm.position;
+//
+//                Object p = optm_position;
+//                final String pkey = p.toString();
+//                if (temps.containsKey(pkey)) {
+//                    final Object pval = temps.get(pkey);
+//
+//                    //porque la gramtica no perminte constantes en el indice de memoria
+//                    p = getDouble(pval) == null ? pval : p;
+//                    count++;
+//                }
+//
+//                final OptMemory optm_new = new OptMemory(optm_memory, p);
+//                bblock_new.add(optm_new);
+//                continue;
+//            }
 
             bblock_new.add(obj);
         }
@@ -575,10 +584,10 @@ public class Opt {
 
         return new Dict("bblock", bblock_new, "count", count);
     }
-    
-    public LinkedHashMap BloqueGlobal() {
+
+    public LinkedHashMap BloqueGlobal(Object app) {
         final LinkedHashMap<String, LinkedHashMap> methods_new = new LinkedHashMap<>();
-        final LinkedHashMap<String, LinkedHashMap> methods = (LinkedHashMap) this.app;
+        final LinkedHashMap<String, LinkedHashMap> methods = (LinkedHashMap) app;
         for (Map.Entry<String, LinkedHashMap> method : methods.entrySet()) {
             final String mname = method.getKey();
             final LinkedHashMap<String, ArrayList> labels = method.getValue();
@@ -587,17 +596,17 @@ public class Opt {
             for (Map.Entry<String, ArrayList> label : labels.entrySet()) {
                 final String lname = label.getKey();
                 String tag = "";
-                if (!lname.isEmpty()){
+                if (!lname.isEmpty()) {
                     tag = lname + ":";
                 }
-                
+
                 final ArrayList stmts = label.getValue();
                 Global.add(tag);
                 for (int i = 0; i < stmts.size(); i++) {
                     Object stmt = stmts.get(i);
                     Global.add(stmt);
                 }
-                
+
             }
             labels_new.put("", optbbG(Global));
             methods_new.put(mname, labels_new);
@@ -605,8 +614,7 @@ public class Opt {
 
         return methods_new;
     }
-    
-    
+
     public ArrayList optbbG(final Object bb) {
         final ArrayList bblock = (ArrayList) bb;
         final String kcount = "count";
@@ -646,5 +654,5 @@ public class Opt {
 
         return res_bblock;
     }
-    
+
 }
