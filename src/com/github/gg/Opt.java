@@ -63,6 +63,25 @@ public class Opt {
         return methods_new;
     }
 
+    public LinkedHashMap opt_global(final Object app) {
+        final LinkedHashMap<String, LinkedHashMap> methods_new = new LinkedHashMap<>();
+        final LinkedHashMap<String, LinkedHashMap> methods = getGlobalBlock(app);
+        for (Map.Entry<String, LinkedHashMap> method : methods.entrySet()) {
+            final String mname = method.getKey();
+            final LinkedHashMap<String, ArrayList> labels = method.getValue();
+            final LinkedHashMap<String, ArrayList> labels_new = new LinkedHashMap<>();
+            for (Map.Entry<String, ArrayList> label : labels.entrySet()) {
+                final String lname = label.getKey();
+                final ArrayList stmts = label.getValue();
+
+                labels_new.put(lname, optgb(stmts));
+            }
+            methods_new.put(mname, labels_new);
+        }
+
+        return methods_new;
+    }
+
     public ArrayList optbb(final Object bb) {
         final ArrayList bblock = (ArrayList) bb;
         final String kcount = "count";
@@ -75,7 +94,7 @@ public class Opt {
 
         do {
 
-                //eviar bucle infinito
+            //eviar bucle infinito
             if (i == 100) {
                 return res_bblock;
             }
@@ -191,14 +210,14 @@ public class Opt {
                 if (temps.containsKey(l_new.toString())) {
                     l_new = temps.get(l_new.toString());
                     count++;
-                    System.err.println(obj);
-                    System.err.println("----");
+//                    System.err.println(obj);
+//                    System.err.println("----");
                 }
                 if (r_new != null && temps.containsKey(r_new.toString())) {
                     r_new = temps.get(r_new.toString());
                     count++;
-                    System.err.println(obj);
-                    System.err.println("----");
+//                    System.err.println(obj);
+//                    System.err.println("----");
                 }
 
                 final OptExpr opte_new = new OptExpr(o, l_new, r_new);
@@ -585,7 +604,7 @@ public class Opt {
         return new Dict("bblock", bblock_new, "count", count);
     }
 
-    public LinkedHashMap BloqueGlobal(Object app) {
+    public LinkedHashMap getGlobalBlock(Object app) {
         final LinkedHashMap<String, LinkedHashMap> methods_new = new LinkedHashMap<>();
         final LinkedHashMap<String, LinkedHashMap> methods = (LinkedHashMap) app;
         for (Map.Entry<String, LinkedHashMap> method : methods.entrySet()) {
@@ -608,14 +627,14 @@ public class Opt {
                 }
 
             }
-            labels_new.put("", optbbG(Global));
+            labels_new.put("", optgb(Global));
             methods_new.put(mname, labels_new);
         }
 
         return methods_new;
     }
 
-    public ArrayList optbbG(final Object bb) {
+    public ArrayList optgb(final Object bb) {
         final ArrayList bblock = (ArrayList) bb;
         final String kcount = "count";
         final String kbblock = "bblock";
@@ -628,7 +647,7 @@ public class Opt {
         do {
             //eviar bucle infinito
             if (i == 100) {
-                break;
+                return res_bblock;
             }
             i++;
 
@@ -651,8 +670,6 @@ public class Opt {
             }
             return res_bblock;
         } while (true);
-
-        return res_bblock;
     }
 
 }
